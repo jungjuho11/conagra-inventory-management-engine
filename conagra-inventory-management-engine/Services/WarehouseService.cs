@@ -14,9 +14,22 @@ public class WarehouseService : IWarehouseService
         _warehouseRepository = warehouseRepository;
     }
 
-    public async Task<PagedResult<WarehouseDto>> GetWarehouseInventoryAsync(QueryParameters queryParameters)
+    public async Task<PagedResult<WarehouseDto>> GetWarehouseInventoryAsync(WarehouseQueryParameters queryParameters)
     {
         var warehouseInventory = await _warehouseRepository.GetAllWarehouseInventoryAsync();
+        
+        // Apply product ID filter
+        if (queryParameters.ProductId.HasValue)
+        {
+            warehouseInventory = warehouseInventory.Where(w => w.ProductId == queryParameters.ProductId.Value);
+        }
+        
+        // Apply product name filter (partial match)
+        if (!string.IsNullOrEmpty(queryParameters.ProductName))
+        {
+            warehouseInventory = warehouseInventory.Where(w => 
+                w.Product?.Name.Contains(queryParameters.ProductName, StringComparison.OrdinalIgnoreCase) == true);
+        }
         
         // Apply search filter
         if (!string.IsNullOrEmpty(queryParameters.Search))
@@ -74,6 +87,18 @@ public class WarehouseService : IWarehouseService
     public async Task<WarehouseDto?> GetWarehouseInventoryByProductAsync(int productId)
     {
         var warehouseInventory = await _warehouseRepository.GetWarehouseInventoryByProductIdAsync(productId);
+        return warehouseInventory == null ? null : new WarehouseDto 
+        { 
+            Id = warehouseInventory.Id, 
+            ProductId = warehouseInventory.ProductId, 
+            Quantity = warehouseInventory.Quantity,
+            ProductName = warehouseInventory.Product?.Name
+        };
+    }
+
+    public async Task<WarehouseDto?> GetWarehouseInventoryByProductNameAsync(string productName)
+    {
+        var warehouseInventory = await _warehouseRepository.GetWarehouseInventoryByProductNameAsync(productName);
         return warehouseInventory == null ? null : new WarehouseDto 
         { 
             Id = warehouseInventory.Id, 

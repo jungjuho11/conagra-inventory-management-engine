@@ -17,7 +17,7 @@ public class WarehouseController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<PagedResult<WarehouseDto>>> GetWarehouseInventory([FromQuery] QueryParameters queryParameters)
+    public async Task<ActionResult<PagedResult<WarehouseDto>>> GetWarehouseInventory([FromQuery] WarehouseQueryParameters queryParameters)
     {
         try
         {
@@ -38,6 +38,23 @@ public class WarehouseController : ControllerBase
             var warehouseInventory = await _warehouseService.GetWarehouseInventoryByProductAsync(productId);
             if (warehouseInventory == null)
                 return NotFound($"No warehouse inventory found for product ID {productId}");
+
+            return Ok(warehouseInventory);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
+
+    [HttpGet("product/name/{productName}")]
+    public async Task<ActionResult<WarehouseDto>> GetWarehouseInventoryByProductName(string productName)
+    {
+        try
+        {
+            var warehouseInventory = await _warehouseService.GetWarehouseInventoryByProductNameAsync(productName);
+            if (warehouseInventory == null)
+                return NotFound($"No warehouse inventory found for product name '{productName}'");
 
             return Ok(warehouseInventory);
         }

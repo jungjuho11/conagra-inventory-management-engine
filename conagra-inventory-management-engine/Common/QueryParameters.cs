@@ -28,3 +28,9 @@ public class InventoryThresholdQueryParameters : QueryParameters
     public int? StoreId { get; set; }
     public int? ProductId { get; set; }
 }
+
+public class WarehouseQueryParameters : QueryParameters
+{
+    public int? ProductId { get; set; }
+    public string? ProductName { get; set; }
+}

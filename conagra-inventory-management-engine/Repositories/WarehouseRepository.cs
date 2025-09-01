@@ -60,6 +60,36 @@ public class WarehouseRepository : IWarehouseRepository
         return warehouse;
     }
 
+    public async Task<Warehouse?> GetWarehouseInventoryByProductNameAsync(string productName)
+    {
+        // First, get all products and filter by name (case-insensitive partial match)
+        var productResponse = await _supabaseClient
+            .From<Product>()
+            .Get();
+        
+        var product = productResponse.Models
+            .FirstOrDefault(p => p.Name.Contains(productName, StringComparison.OrdinalIgnoreCase));
+        
+        if (product == null)
+            return null;
+        
+        // Then find the warehouse inventory for that product
+        var warehouseResponse = await _supabaseClient
+            .From<Warehouse>()
+            .Where(x => x.ProductId == product.Id)
+            .Get();
+        
+        var warehouse = warehouseResponse.Models.FirstOrDefault();
+        
+        // Load product information
+        if (warehouse != null)
+        {
+            warehouse.Product = product;
+        }
+        
+        return warehouse;
+    }
+
     public async Task<bool> UpdateWarehouseQuantityAsync(int productId, int newQuantity)
     {
         var response = await _supabaseClient

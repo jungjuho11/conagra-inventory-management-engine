@@ -6,6 +6,7 @@ namespace conagra_inventory_management_engine.Services;
 
 public interface IWarehouseService
 {
-    Task<PagedResult<WarehouseDto>> GetWarehouseInventoryAsync(QueryParameters queryParameters);
+    Task<PagedResult<WarehouseDto>> GetWarehouseInventoryAsync(WarehouseQueryParameters queryParameters);
     Task<WarehouseDto?> GetWarehouseInventoryByProductAsync(int productId);
+    Task<WarehouseDto?> GetWarehouseInventoryByProductNameAsync(string productName);
 }

@@ -6,5 +6,6 @@ public interface IWarehouseRepository
 {
     Task<IEnumerable<Warehouse>> GetAllWarehouseInventoryAsync();
     Task<Warehouse?> GetWarehouseInventoryByProductIdAsync(int productId);
+    Task<Warehouse?> GetWarehouseInventoryByProductNameAsync(string productName);
     Task<bool> UpdateWarehouseQuantityAsync(int productId, int newQuantity);
 }
