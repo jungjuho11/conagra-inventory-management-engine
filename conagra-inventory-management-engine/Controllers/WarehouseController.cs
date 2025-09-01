@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using conagra_inventory_management_engine.Services;
+using conagra_inventory_management_engine.Common;
+using conagra_inventory_management_engine.DTOs;
 
 namespace conagra_inventory_management_engine.Controllers;
 
@@ -15,13 +17,12 @@ public class WarehouseController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<object>>> GetAllWarehouseInventory()
+    public async Task<ActionResult<PagedResult<WarehouseDto>>> GetWarehouseInventory([FromQuery] QueryParameters queryParameters)
     {
         try
         {
-            var warehouseInventory = await _warehouseService.GetWarehouseInventoryAsync();
-            var warehouseDtos = warehouseInventory.Select(w => new { w.Id, w.ProductId, w.Quantity }).ToList();
-            return Ok(warehouseDtos);
+            var result = await _warehouseService.GetWarehouseInventoryAsync(queryParameters);
+            return Ok(result);
         }
         catch (Exception ex)
         {
@@ -30,7 +31,7 @@ public class WarehouseController : ControllerBase
     }
 
     [HttpGet("product/{productId}")]
-    public async Task<ActionResult<object>> GetWarehouseInventoryByProduct(int productId)
+    public async Task<ActionResult<WarehouseDto>> GetWarehouseInventoryByProduct(int productId)
     {
         try
         {
@@ -38,7 +39,7 @@ public class WarehouseController : ControllerBase
             if (warehouseInventory == null)
                 return NotFound($"No warehouse inventory found for product ID {productId}");
 
-            return Ok(new { warehouseInventory.Id, warehouseInventory.ProductId, warehouseInventory.Quantity });
+            return Ok(warehouseInventory);
         }
         catch (Exception ex)
         {

@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using conagra_inventory_management_engine.Services;
+using conagra_inventory_management_engine.Common;
+using conagra_inventory_management_engine.DTOs;
 
 namespace conagra_inventory_management_engine.Controllers;
 
@@ -15,43 +17,12 @@ public class InventoryThresholdsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<object>>> GetAllInventoryThresholds()
+    public async Task<ActionResult<PagedResult<InventoryThresholdDto>>> GetInventoryThresholds([FromQuery] InventoryThresholdQueryParameters queryParameters)
     {
         try
         {
-            var inventoryThresholds = await _inventoryThresholdsService.GetAllInventoryThresholdsAsync();
-            var thresholdDtos = inventoryThresholds.Select(it => new { it.Id, it.StoreId, it.ProductId, it.ThresholdQuantity }).ToList();
-            return Ok(thresholdDtos);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"Internal server error: {ex.Message}");
-        }
-    }
-
-    [HttpGet("store/{storeId}")]
-    public async Task<ActionResult<IEnumerable<object>>> GetInventoryThresholdsByStore(int storeId)
-    {
-        try
-        {
-            var inventoryThresholds = await _inventoryThresholdsService.GetInventoryThresholdsByStoreAsync(storeId);
-            var thresholdDtos = inventoryThresholds.Select(it => new { it.Id, it.StoreId, it.ProductId, it.ThresholdQuantity }).ToList();
-            return Ok(thresholdDtos);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"Internal server error: {ex.Message}");
-        }
-    }
-
-    [HttpGet("product/{productId}")]
-    public async Task<ActionResult<IEnumerable<object>>> GetInventoryThresholdsByProduct(int productId)
-    {
-        try
-        {
-            var inventoryThresholds = await _inventoryThresholdsService.GetInventoryThresholdsByProductAsync(productId);
-            var thresholdDtos = inventoryThresholds.Select(it => new { it.Id, it.StoreId, it.ProductId, it.ThresholdQuantity }).ToList();
-            return Ok(thresholdDtos);
+            var result = await _inventoryThresholdsService.GetInventoryThresholdsAsync(queryParameters);
+            return Ok(result);
         }
         catch (Exception ex)
         {
@@ -60,7 +31,7 @@ public class InventoryThresholdsController : ControllerBase
     }
 
     [HttpGet("store/{storeId}/product/{productId}")]
-    public async Task<ActionResult<object>> GetInventoryThresholdByStoreAndProduct(int storeId, int productId)
+    public async Task<ActionResult<InventoryThresholdDto>> GetInventoryThresholdByStoreAndProduct(int storeId, int productId)
     {
         try
         {
@@ -68,7 +39,7 @@ public class InventoryThresholdsController : ControllerBase
             if (inventoryThreshold == null)
                 return NotFound($"No inventory threshold found for store ID {storeId} and product ID {productId}");
 
-            return Ok(new { inventoryThreshold.Id, inventoryThreshold.StoreId, inventoryThreshold.ProductId, inventoryThreshold.ThresholdQuantity });
+            return Ok(inventoryThreshold);
         }
         catch (Exception ex)
         {

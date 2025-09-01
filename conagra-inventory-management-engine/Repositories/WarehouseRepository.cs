@@ -18,7 +18,23 @@ public class WarehouseRepository : IWarehouseRepository
             .From<Warehouse>()
             .Get();
         
-        return response.Models;
+        var warehouses = response.Models.ToList();
+        
+        // Load product information for each warehouse item
+        foreach (var warehouse in warehouses)
+        {
+            if (warehouse.ProductId > 0)
+            {
+                var productResponse = await _supabaseClient
+                    .From<Product>()
+                    .Where(x => x.Id == warehouse.ProductId)
+                    .Get();
+                
+                warehouse.Product = productResponse.Models.FirstOrDefault();
+            }
+        }
+        
+        return warehouses;
     }
 
     public async Task<Warehouse?> GetWarehouseInventoryByProductIdAsync(int productId)
@@ -28,7 +44,20 @@ public class WarehouseRepository : IWarehouseRepository
             .Where(x => x.ProductId == productId)
             .Get();
         
-        return response.Models.FirstOrDefault();
+        var warehouse = response.Models.FirstOrDefault();
+        
+        // Load product information
+        if (warehouse != null && warehouse.ProductId > 0)
+        {
+            var productResponse = await _supabaseClient
+                .From<Product>()
+                .Where(x => x.Id == warehouse.ProductId)
+                .Get();
+            
+            warehouse.Product = productResponse.Models.FirstOrDefault();
+        }
+        
+        return warehouse;
     }
 
     public async Task<bool> UpdateWarehouseQuantityAsync(int productId, int newQuantity)

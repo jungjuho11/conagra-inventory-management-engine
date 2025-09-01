@@ -1,9 +1,11 @@
 using conagra_inventory_management_engine.Models;
+using conagra_inventory_management_engine.Common;
+using conagra_inventory_management_engine.DTOs;
 
 namespace conagra_inventory_management_engine.Services;
 
 public interface IWarehouseService
 {
-    Task<IEnumerable<Warehouse>> GetWarehouseInventoryAsync();
-    Task<Warehouse?> GetWarehouseInventoryByProductAsync(int productId);
+    Task<PagedResult<WarehouseDto>> GetWarehouseInventoryAsync(QueryParameters queryParameters);
+    Task<WarehouseDto?> GetWarehouseInventoryByProductAsync(int productId);
 }

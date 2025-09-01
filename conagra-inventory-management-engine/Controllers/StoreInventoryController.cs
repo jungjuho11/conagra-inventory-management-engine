@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using conagra_inventory_management_engine.Services;
+using conagra_inventory_management_engine.Common;
+using conagra_inventory_management_engine.DTOs;
 
 namespace conagra_inventory_management_engine.Controllers;
 
@@ -15,45 +17,12 @@ public class StoreInventoryController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<object>>> GetAllStoreInventory()
+    public async Task<ActionResult<PagedResult<StoreInventoryDto>>> GetStoreInventory([FromQuery] StoreInventoryQueryParameters queryParameters)
     {
         try
         {
-            var storeInventory = await _storeInventoryService.GetAllStoreInventoryAsync();
-            var storeInventoryDtos = storeInventory.Select(si => new { si.Id, si.StoreId, si.ProductId, si.Quantity }).ToList();
-            return Ok(storeInventoryDtos);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"Internal server error: {ex.Message}");
-        }
-    }
-
-    [HttpGet("store/{storeId}")]
-    public async Task<ActionResult<IEnumerable<object>>> GetStoreInventoryByStore(int storeId)
-    {
-        try
-        {
-            var storeInventory = await _storeInventoryService.GetStoreInventoryByStoreAsync(storeId);
-            var storeInventoryDtos = storeInventory.Select(si => new { si.Id, si.StoreId, si.ProductId, si.Quantity }).ToList();
-            return Ok(storeInventoryDtos);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"Internal server error: {ex.Message}");
-        }
-    }
-
-    [HttpGet("product/{productId}")]
-    public async Task<ActionResult<IEnumerable<object>>> GetStoreInventoryByProduct(int productId)
-    {
-        try
-        {
-            // Get all store inventory and filter by product ID
-            var allStoreInventory = await _storeInventoryService.GetAllStoreInventoryAsync();
-            var filteredInventory = allStoreInventory.Where(si => si.ProductId == productId);
-            var storeInventoryDtos = filteredInventory.Select(si => new { si.Id, si.StoreId, si.ProductId, si.Quantity }).ToList();
-            return Ok(storeInventoryDtos);
+            var result = await _storeInventoryService.GetStoreInventoryAsync(queryParameters);
+            return Ok(result);
         }
         catch (Exception ex)
         {
@@ -62,7 +31,7 @@ public class StoreInventoryController : ControllerBase
     }
 
     [HttpGet("store/{storeId}/product/{productId}")]
-    public async Task<ActionResult<object>> GetStoreInventoryByStoreAndProduct(int storeId, int productId)
+    public async Task<ActionResult<StoreInventoryDto>> GetStoreInventoryByStoreAndProduct(int storeId, int productId)
     {
         try
         {
@@ -70,22 +39,7 @@ public class StoreInventoryController : ControllerBase
             if (storeInventory == null)
                 return NotFound($"No inventory found for store ID {storeId} and product ID {productId}");
 
-            return Ok(new { storeInventory.Id, storeInventory.StoreId, storeInventory.ProductId, storeInventory.Quantity });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"Internal server error: {ex.Message}");
-        }
-    }
-
-    [HttpGet("below-threshold")]
-    public async Task<ActionResult<IEnumerable<object>>> GetStoresBelowThreshold()
-    {
-        try
-        {
-            var storesBelowThreshold = await _storeInventoryService.GetStoresBelowThresholdAsync();
-            var storesBelowThresholdDtos = storesBelowThreshold.Select(si => new { si.Id, si.StoreId, si.ProductId, si.Quantity }).ToList();
-            return Ok(storesBelowThresholdDtos);
+            return Ok(storeInventory);
         }
         catch (Exception ex)
         {

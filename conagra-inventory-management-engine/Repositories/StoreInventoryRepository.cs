@@ -18,7 +18,35 @@ public class StoreInventoryRepository : IStoreInventoryRepository
             .From<StoreInventory>()
             .Get();
         
-        return response.Models;
+        var storeInventories = response.Models.ToList();
+        
+        // Load store and product information for each inventory item
+        foreach (var inventory in storeInventories)
+        {
+            // Load store information
+            if (inventory.StoreId > 0)
+            {
+                var storeResponse = await _supabaseClient
+                    .From<Store>()
+                    .Where(x => x.Id == inventory.StoreId)
+                    .Get();
+                
+                inventory.Store = storeResponse.Models.FirstOrDefault();
+            }
+            
+            // Load product information
+            if (inventory.ProductId > 0)
+            {
+                var productResponse = await _supabaseClient
+                    .From<Product>()
+                    .Where(x => x.Id == inventory.ProductId)
+                    .Get();
+                
+                inventory.Product = productResponse.Models.FirstOrDefault();
+            }
+        }
+        
+        return storeInventories;
     }
 
     public async Task<IEnumerable<StoreInventory>> GetStoreInventoryByStoreIdAsync(int storeId)
@@ -28,7 +56,35 @@ public class StoreInventoryRepository : IStoreInventoryRepository
             .Where(x => x.StoreId == storeId)
             .Get();
         
-        return response.Models;
+        var storeInventories = response.Models.ToList();
+        
+        // Load store and product information for each inventory item
+        foreach (var inventory in storeInventories)
+        {
+            // Load store information
+            if (inventory.StoreId > 0)
+            {
+                var storeResponse = await _supabaseClient
+                    .From<Store>()
+                    .Where(x => x.Id == inventory.StoreId)
+                    .Get();
+                
+                inventory.Store = storeResponse.Models.FirstOrDefault();
+            }
+            
+            // Load product information
+            if (inventory.ProductId > 0)
+            {
+                var productResponse = await _supabaseClient
+                    .From<Product>()
+                    .Where(x => x.Id == inventory.ProductId)
+                    .Get();
+                
+                inventory.Product = productResponse.Models.FirstOrDefault();
+            }
+        }
+        
+        return storeInventories;
     }
 
     public async Task<StoreInventory?> GetStoreInventoryByStoreAndProductAsync(int storeId, int productId)
@@ -38,7 +94,35 @@ public class StoreInventoryRepository : IStoreInventoryRepository
             .Where(x => x.StoreId == storeId && x.ProductId == productId)
             .Get();
         
-        return response.Models.FirstOrDefault();
+        var inventory = response.Models.FirstOrDefault();
+        
+        // Load store and product information
+        if (inventory != null)
+        {
+            // Load store information
+            if (inventory.StoreId > 0)
+            {
+                var storeResponse = await _supabaseClient
+                    .From<Store>()
+                    .Where(x => x.Id == inventory.StoreId)
+                    .Get();
+                
+                inventory.Store = storeResponse.Models.FirstOrDefault();
+            }
+            
+            // Load product information
+            if (inventory.ProductId > 0)
+            {
+                var productResponse = await _supabaseClient
+                    .From<Product>()
+                    .Where(x => x.Id == inventory.ProductId)
+                    .Get();
+                
+                inventory.Product = productResponse.Models.FirstOrDefault();
+            }
+        }
+        
+        return inventory;
     }
 
     public async Task<StoreInventory> ShipProductToStoreAsync(int storeId, int productId, int quantity)

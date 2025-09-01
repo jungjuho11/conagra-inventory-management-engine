@@ -1,11 +1,11 @@
 using conagra_inventory_management_engine.Models;
+using conagra_inventory_management_engine.Common;
+using conagra_inventory_management_engine.DTOs;
 
 namespace conagra_inventory_management_engine.Services;
 
 public interface IStoreInventoryService
 {
-    Task<IEnumerable<StoreInventory>> GetAllStoreInventoryAsync();
-    Task<IEnumerable<StoreInventory>> GetStoreInventoryByStoreAsync(int storeId);
-    Task<StoreInventory?> GetStoreInventoryByStoreAndProductAsync(int storeId, int productId);
-    Task<IEnumerable<StoreInventory>> GetStoresBelowThresholdAsync();
+    Task<PagedResult<StoreInventoryDto>> GetStoreInventoryAsync(StoreInventoryQueryParameters queryParameters);
+    Task<StoreInventoryDto?> GetStoreInventoryByStoreAndProductAsync(int storeId, int productId);
 }

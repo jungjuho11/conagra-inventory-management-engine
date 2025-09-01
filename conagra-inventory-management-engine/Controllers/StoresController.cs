@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using conagra_inventory_management_engine.Services;
+using conagra_inventory_management_engine.Common;
+using conagra_inventory_management_engine.DTOs;
 
 namespace conagra_inventory_management_engine.Controllers;
 
@@ -15,13 +17,12 @@ public class StoresController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<object>>> GetAllStores()
+    public async Task<ActionResult<PagedResult<StoreDto>>> GetStores([FromQuery] QueryParameters queryParameters)
     {
         try
         {
-            var stores = await _storesService.GetAllStoresAsync();
-            var storeDtos = stores.Select(s => new { s.Id, s.Name, s.Address }).ToList();
-            return Ok(storeDtos);
+            var result = await _storesService.GetStoresAsync(queryParameters);
+            return Ok(result);
         }
         catch (Exception ex)
         {
@@ -30,7 +31,7 @@ public class StoresController : ControllerBase
     }
 
     [HttpGet("{storeId}")]
-    public async Task<ActionResult<object>> GetStoreById(int storeId)
+    public async Task<ActionResult<StoreDto>> GetStoreById(int storeId)
     {
         try
         {
@@ -38,7 +39,7 @@ public class StoresController : ControllerBase
             if (store == null)
                 return NotFound($"Store with ID {storeId} not found");
 
-            return Ok(new { store.Id, store.Name, store.Address });
+            return Ok(store);
         }
         catch (Exception ex)
         {

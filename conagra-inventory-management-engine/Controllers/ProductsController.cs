@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using conagra_inventory_management_engine.Services;
+using conagra_inventory_management_engine.Common;
+using conagra_inventory_management_engine.DTOs;
 
 namespace conagra_inventory_management_engine.Controllers;
 
@@ -15,13 +17,12 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<object>>> GetAllProducts()
+    public async Task<ActionResult<PagedResult<ProductDto>>> GetProducts([FromQuery] QueryParameters queryParameters)
     {
         try
         {
-            var products = await _productsService.GetAllProductsAsync();
-            var productDtos = products.Select(p => new { p.Id, p.Name }).ToList();
-            return Ok(productDtos);
+            var result = await _productsService.GetProductsAsync(queryParameters);
+            return Ok(result);
         }
         catch (Exception ex)
         {
@@ -30,7 +31,7 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet("{productId}")]
-    public async Task<ActionResult<object>> GetProductById(int productId)
+    public async Task<ActionResult<ProductDto>> GetProductById(int productId)
     {
         try
         {
@@ -38,7 +39,7 @@ public class ProductsController : ControllerBase
             if (product == null)
                 return NotFound($"Product with ID {productId} not found");
 
-            return Ok(new { product.Id, product.Name });
+            return Ok(product);
         }
         catch (Exception ex)
         {
