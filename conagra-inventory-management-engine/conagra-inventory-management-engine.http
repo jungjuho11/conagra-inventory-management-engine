@@ -1,0 +1,6 @@
+@conagra_inventory_management_engine_HostAddress = http://localhost:5160
+
+GET {{conagra_inventory_management_engine_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
