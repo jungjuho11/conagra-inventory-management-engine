@@ -8,4 +8,5 @@ public interface IStoresService
 {
     Task<PagedResult<StoreDto>> GetStoresAsync(StoreQueryParameters queryParameters);
     Task<StoreDto?> GetStoreByIdAsync(int storeId);
+    Task<StoreDto> CreateStoreAsync(CreateStoreDto createStoreDto);
 }

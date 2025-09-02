@@ -30,4 +30,29 @@ public class StoreRepository : IStoreRepository
         
         return response.Models.FirstOrDefault();
     }
+
+    public async Task<int> GetLastStoreIdAsync()
+    {
+        var response = await _supabaseClient
+            .From<Store>()
+            .Order(x => x.Id, Supabase.Postgrest.Constants.Ordering.Descending)
+            .Limit(1)
+            .Get();
+        
+        if (response.Models.Any())
+        {
+            return response.Models.First().Id;
+        }
+        
+        return 0; // If no stores exist, start with ID 1
+    }
+
+    public async Task<Store> CreateStoreAsync(Store store)
+    {
+        var response = await _supabaseClient
+            .From<Store>()
+            .Insert(store);
+        
+        return response.Models.First();
+    }
 }

@@ -81,4 +81,27 @@ public class StoresService : IStoresService
         var store = await _storeRepository.GetStoreByIdAsync(storeId);
         return store == null ? null : new StoreDto { Id = store.Id, Name = store.Name, Address = store.Address };
     }
+
+    public async Task<StoreDto> CreateStoreAsync(CreateStoreDto createStoreDto)
+    {
+        // Get the last store ID and increment it
+        var lastId = await _storeRepository.GetLastStoreIdAsync();
+        var newId = lastId + 1;
+
+        var store = new Store
+        {
+            Id = newId,
+            Name = createStoreDto.Name,
+            Address = createStoreDto.Address
+        };
+
+        var createdStore = await _storeRepository.CreateStoreAsync(store);
+
+        return new StoreDto 
+        { 
+            Id = createdStore.Id, 
+            Name = createdStore.Name, 
+            Address = createdStore.Address
+        };
+    }
 }

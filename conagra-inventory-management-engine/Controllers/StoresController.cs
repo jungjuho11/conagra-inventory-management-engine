@@ -46,4 +46,28 @@ public class StoresController : ControllerBase
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
+
+    [HttpPost]
+    public async Task<ActionResult<StoreDto>> CreateStore([FromBody] CreateStoreDto createStoreDto)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(createStoreDto.Name))
+            {
+                return BadRequest("Store name is required");
+            }
+
+            if (string.IsNullOrWhiteSpace(createStoreDto.Address))
+            {
+                return BadRequest("Store address is required");
+            }
+
+            var createdStore = await _storesService.CreateStoreAsync(createStoreDto);
+            return CreatedAtAction(nameof(GetStoreById), new { storeId = createdStore.Id }, createdStore);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
 }

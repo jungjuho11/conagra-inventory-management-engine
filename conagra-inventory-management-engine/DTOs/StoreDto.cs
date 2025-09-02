@@ -7,6 +7,12 @@ public class StoreDto
     public string? Address { get; set; }
 }
 
+public class CreateStoreDto
+{
+    public string Name { get; set; } = string.Empty;
+    public string Address { get; set; } = string.Empty;
+}
+
 public class StoreDetailDto : StoreDto
 {
     // Add any additional fields for detailed store view if needed
