@@ -30,13 +30,6 @@ public class WarehouseService : IWarehouseService
             warehouseInventory = warehouseInventory.Where(w => 
                 w.Product?.Name.Contains(queryParameters.ProductName, StringComparison.OrdinalIgnoreCase) == true);
         }
-        
-        // Apply search filter
-        if (!string.IsNullOrEmpty(queryParameters.Search))
-        {
-            warehouseInventory = warehouseInventory.Where(w => 
-                w.Product?.Name.Contains(queryParameters.Search, StringComparison.OrdinalIgnoreCase) == true);
-        }
 
         // Apply sorting
         if (!string.IsNullOrEmpty(queryParameters.SortBy))

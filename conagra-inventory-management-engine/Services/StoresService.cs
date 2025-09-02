@@ -35,14 +35,6 @@ public class StoresService : IStoresService
         {
             stores = stores.Where(s => s.Address != null && s.Address.Contains(queryParameters.StoreAddress, StringComparison.OrdinalIgnoreCase));
         }
-        
-        // Apply search filter
-        if (!string.IsNullOrEmpty(queryParameters.Search))
-        {
-            stores = stores.Where(s => 
-                s.Name.Contains(queryParameters.Search, StringComparison.OrdinalIgnoreCase) ||
-                (s.Address != null && s.Address.Contains(queryParameters.Search, StringComparison.OrdinalIgnoreCase)));
-        }
 
         // Apply sorting
         if (!string.IsNullOrEmpty(queryParameters.SortBy))

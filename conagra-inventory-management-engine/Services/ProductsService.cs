@@ -29,12 +29,6 @@ public class ProductsService : IProductsService
         {
             products = products.Where(p => p.Name.Contains(queryParameters.ProductName, StringComparison.OrdinalIgnoreCase));
         }
-        
-        // Apply search filter
-        if (!string.IsNullOrEmpty(queryParameters.Search))
-        {
-            products = products.Where(p => p.Name.Contains(queryParameters.Search, StringComparison.OrdinalIgnoreCase));
-        }
 
         // Apply sorting
         if (!string.IsNullOrEmpty(queryParameters.SortBy))

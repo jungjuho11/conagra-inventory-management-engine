@@ -36,14 +36,6 @@ public class StoreInventoryService : IStoreInventoryService
             storeInventory = storeInventory.Where(si => si.Quantity < 10); // Example threshold
         }
 
-        // Apply search filter (search by store name or product name if available)
-        if (!string.IsNullOrEmpty(queryParameters.Search))
-        {
-            storeInventory = storeInventory.Where(si => 
-                si.Store?.Name.Contains(queryParameters.Search, StringComparison.OrdinalIgnoreCase) == true ||
-                si.Product?.Name.Contains(queryParameters.Search, StringComparison.OrdinalIgnoreCase) == true);
-        }
-
         // Apply sorting
         if (!string.IsNullOrEmpty(queryParameters.SortBy))
         {

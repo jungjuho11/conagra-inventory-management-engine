@@ -30,14 +30,6 @@ public class InventoryThresholdsService : IInventoryThresholdsService
             thresholds = thresholds.Where(it => it.ProductId == queryParameters.ProductId.Value);
         }
 
-        // Apply search filter (search by store name or product name if available)
-        if (!string.IsNullOrEmpty(queryParameters.Search))
-        {
-            thresholds = thresholds.Where(it => 
-                it.Store?.Name.Contains(queryParameters.Search, StringComparison.OrdinalIgnoreCase) == true ||
-                it.Product?.Name.Contains(queryParameters.Search, StringComparison.OrdinalIgnoreCase) == true);
-        }
-
         // Apply sorting
         if (!string.IsNullOrEmpty(queryParameters.SortBy))
         {
