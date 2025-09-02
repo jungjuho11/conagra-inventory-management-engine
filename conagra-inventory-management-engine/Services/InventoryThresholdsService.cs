@@ -17,49 +17,77 @@ public class InventoryThresholdsService : IInventoryThresholdsService
     public async Task<PagedResult<InventoryThresholdDto>> GetInventoryThresholdsAsync(InventoryThresholdQueryParameters queryParameters)
     {
         var inventoryThresholds = await _supabaseClient.From<InventoryThreshold>().Get();
-        var thresholds = inventoryThresholds.Models.AsEnumerable();
+        var thresholds = inventoryThresholds.Models.ToList();
+        
+        // Load store and product information for each threshold
+        foreach (var threshold in thresholds)
+        {
+            // Load store information
+            if (threshold.StoreId > 0)
+            {
+                var storeResponse = await _supabaseClient
+                    .From<Store>()
+                    .Where(x => x.Id == threshold.StoreId)
+                    .Get();
+                
+                threshold.Store = storeResponse.Models.FirstOrDefault();
+            }
+            
+            // Load product information
+            if (threshold.ProductId > 0)
+            {
+                var productResponse = await _supabaseClient
+                    .From<Product>()
+                    .Where(x => x.Id == threshold.ProductId)
+                    .Get();
+                
+                threshold.Product = productResponse.Models.FirstOrDefault();
+            }
+        }
+        
+        var thresholdsEnumerable = thresholds.AsEnumerable();
         
         // Apply filters
         if (queryParameters.StoreId.HasValue)
         {
-            thresholds = thresholds.Where(it => it.StoreId == queryParameters.StoreId.Value);
+            thresholdsEnumerable = thresholdsEnumerable.Where(it => it.StoreId == queryParameters.StoreId.Value);
         }
 
         if (queryParameters.ProductId.HasValue)
         {
-            thresholds = thresholds.Where(it => it.ProductId == queryParameters.ProductId.Value);
+            thresholdsEnumerable = thresholdsEnumerable.Where(it => it.ProductId == queryParameters.ProductId.Value);
         }
 
         // Apply sorting
         if (!string.IsNullOrEmpty(queryParameters.SortBy))
         {
-            thresholds = queryParameters.SortBy.ToLower() switch
+            thresholdsEnumerable = queryParameters.SortBy.ToLower() switch
             {
                 "storename" => queryParameters.SortOrder.ToLower() == "desc" 
-                    ? thresholds.OrderByDescending(it => it.Store?.Name)
-                    : thresholds.OrderBy(it => it.Store?.Name),
+                    ? thresholdsEnumerable.OrderByDescending(it => it.Store?.Name)
+                    : thresholdsEnumerable.OrderBy(it => it.Store?.Name),
                 "productname" => queryParameters.SortOrder.ToLower() == "desc"
-                    ? thresholds.OrderByDescending(it => it.Product?.Name)
-                    : thresholds.OrderBy(it => it.Product?.Name),
+                    ? thresholdsEnumerable.OrderByDescending(it => it.Product?.Name)
+                    : thresholdsEnumerable.OrderBy(it => it.Product?.Name),
                 "thresholdquantity" => queryParameters.SortOrder.ToLower() == "desc"
-                    ? thresholds.OrderByDescending(it => it.ThresholdQuantity)
-                    : thresholds.OrderBy(it => it.ThresholdQuantity),
+                    ? thresholdsEnumerable.OrderByDescending(it => it.ThresholdQuantity)
+                    : thresholdsEnumerable.OrderBy(it => it.ThresholdQuantity),
                 "storeid" => queryParameters.SortOrder.ToLower() == "desc"
-                    ? thresholds.OrderByDescending(it => it.StoreId)
-                    : thresholds.OrderBy(it => it.StoreId),
+                    ? thresholdsEnumerable.OrderByDescending(it => it.StoreId)
+                    : thresholdsEnumerable.OrderBy(it => it.StoreId),
                 "productid" => queryParameters.SortOrder.ToLower() == "desc"
-                    ? thresholds.OrderByDescending(it => it.ProductId)
-                    : thresholds.OrderBy(it => it.ProductId),
-                _ => thresholds.OrderBy(it => it.Id)
+                    ? thresholdsEnumerable.OrderByDescending(it => it.ProductId)
+                    : thresholdsEnumerable.OrderBy(it => it.ProductId),
+                _ => thresholdsEnumerable.OrderBy(it => it.Id)
             };
         }
         else
         {
-            thresholds = thresholds.OrderBy(it => it.Id);
+            thresholdsEnumerable = thresholdsEnumerable.OrderBy(it => it.Id);
         }
 
-        var totalCount = thresholds.Count();
-        var pagedThresholds = thresholds
+        var totalCount = thresholdsEnumerable.Count();
+        var pagedThresholds = thresholdsEnumerable
             .Skip((queryParameters.Page - 1) * queryParameters.PageSize)
             .Take(queryParameters.PageSize)
             .Select(it => new InventoryThresholdDto 
@@ -88,7 +116,33 @@ public class InventoryThresholdsService : IInventoryThresholdsService
     {
         var response = await _supabaseClient.From<InventoryThreshold>().Where(x => x.StoreId == storeId && x.ProductId == productId).Get();
         var threshold = response.Models.FirstOrDefault();
-        return threshold == null ? null : new InventoryThresholdDto 
+        
+        if (threshold == null)
+            return null;
+        
+        // Load store information
+        if (threshold.StoreId > 0)
+        {
+            var storeResponse = await _supabaseClient
+                .From<Store>()
+                .Where(x => x.Id == threshold.StoreId)
+                .Get();
+            
+            threshold.Store = storeResponse.Models.FirstOrDefault();
+        }
+        
+        // Load product information
+        if (threshold.ProductId > 0)
+        {
+            var productResponse = await _supabaseClient
+                .From<Product>()
+                .Where(x => x.Id == threshold.ProductId)
+                .Get();
+            
+            threshold.Product = productResponse.Models.FirstOrDefault();
+        }
+        
+        return new InventoryThresholdDto 
         { 
             Id = threshold.Id, 
             StoreId = threshold.StoreId, 
