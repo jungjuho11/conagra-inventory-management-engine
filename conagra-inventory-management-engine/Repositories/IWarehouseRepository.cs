@@ -8,4 +8,7 @@ public interface IWarehouseRepository
     Task<Warehouse?> GetWarehouseInventoryByProductIdAsync(int productId);
     Task<Warehouse?> GetWarehouseInventoryByProductNameAsync(string productName);
     Task<bool> UpdateWarehouseQuantityAsync(int productId, int newQuantity);
+    Task<bool> ProductExistsAsync(int productId);
+    Task<int> GetLastWarehouseIdAsync();
+    Task<Warehouse> CreateWarehouseAsync(Warehouse warehouse);
 }

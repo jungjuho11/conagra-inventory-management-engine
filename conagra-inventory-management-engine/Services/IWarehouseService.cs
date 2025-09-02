@@ -9,4 +9,5 @@ public interface IWarehouseService
     Task<PagedResult<WarehouseDto>> GetWarehouseInventoryAsync(WarehouseQueryParameters queryParameters);
     Task<WarehouseDto?> GetWarehouseInventoryByProductAsync(int productId);
     Task<WarehouseDto?> GetWarehouseInventoryByProductNameAsync(string productName);
+    Task<WarehouseDto> CreateWarehouseAsync(CreateWarehouseDto createWarehouseDto);
 }

@@ -8,6 +8,12 @@ public class WarehouseDto
     public string? ProductName { get; set; }
 }
 
+public class CreateWarehouseDto
+{
+    public int ProductId { get; set; }
+    public int Quantity { get; set; }
+}
+
 public class WarehouseDetailDto : WarehouseDto
 {
     // Add any additional fields for detailed warehouse view if needed

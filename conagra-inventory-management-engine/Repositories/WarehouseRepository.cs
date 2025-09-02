@@ -100,4 +100,54 @@ public class WarehouseRepository : IWarehouseRepository
     
         return response.Models.Count > 0;
     }
+
+    public async Task<bool> ProductExistsAsync(int productId)
+    {
+        var response = await _supabaseClient
+            .From<Product>()
+            .Where(x => x.Id == productId)
+            .Get();
+        
+        return response.Models.Any();
+    }
+
+    public async Task<int> GetLastWarehouseIdAsync()
+    {
+        var response = await _supabaseClient
+            .From<Warehouse>()
+            .Order(x => x.Id, Supabase.Postgrest.Constants.Ordering.Descending)
+            .Limit(1)
+            .Get();
+        
+        if (response.Models.Any())
+        {
+            return response.Models.First().Id;
+        }
+        
+        return 0; // If no warehouse records exist, start with ID 1
+    }
+
+    public async Task<Warehouse> CreateWarehouseAsync(Warehouse warehouse)
+    {
+        // Use WarehouseInsert model to avoid navigation property issues
+        var warehouseToInsert = new WarehouseInsert
+        {
+            Id = warehouse.Id,
+            ProductId = warehouse.ProductId,
+            Quantity = warehouse.Quantity
+        };
+        
+        var response = await _supabaseClient
+            .From<WarehouseInsert>()
+            .Insert(warehouseToInsert);
+        
+        // Convert back to Warehouse model for return
+        var insertedWarehouse = response.Models.First();
+        return new Warehouse
+        {
+            Id = insertedWarehouse.Id,
+            ProductId = insertedWarehouse.ProductId,
+            Quantity = insertedWarehouse.Quantity
+        };
+    }
 }

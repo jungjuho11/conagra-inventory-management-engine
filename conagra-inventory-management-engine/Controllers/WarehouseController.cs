@@ -63,4 +63,32 @@ public class WarehouseController : ControllerBase
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
+
+    [HttpPost]
+    public async Task<ActionResult<WarehouseDto>> CreateWarehouse([FromBody] CreateWarehouseDto createWarehouseDto)
+    {
+        try
+        {
+            if (createWarehouseDto.ProductId <= 0)
+            {
+                return BadRequest("Product ID must be greater than 0");
+            }
+
+            if (createWarehouseDto.Quantity <= 1)
+            {
+                return BadRequest("Quantity must be greater than 1");
+            }
+
+            var createdWarehouse = await _warehouseService.CreateWarehouseAsync(createWarehouseDto);
+            return CreatedAtAction(nameof(GetWarehouseInventoryByProduct), new { productId = createdWarehouse.ProductId }, createdWarehouse);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
 }

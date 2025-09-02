@@ -100,4 +100,42 @@ public class WarehouseService : IWarehouseService
             ProductName = warehouseInventory.Product?.Name
         };
     }
+
+    public async Task<WarehouseDto> CreateWarehouseAsync(CreateWarehouseDto createWarehouseDto)
+    {
+        // Validate that the product exists
+        var productExists = await _warehouseRepository.ProductExistsAsync(createWarehouseDto.ProductId);
+        if (!productExists)
+        {
+            throw new InvalidOperationException($"Product with ID {createWarehouseDto.ProductId} does not exist.");
+        }
+
+        // Check if warehouse inventory already exists for this product
+        var existingWarehouse = await _warehouseRepository.GetWarehouseInventoryByProductIdAsync(createWarehouseDto.ProductId);
+        if (existingWarehouse != null)
+        {
+            throw new InvalidOperationException($"Warehouse inventory already exists for product ID {createWarehouseDto.ProductId}.");
+        }
+
+        // Get the last warehouse ID and increment it
+        var lastId = await _warehouseRepository.GetLastWarehouseIdAsync();
+        var newId = lastId + 1;
+
+        var warehouse = new Warehouse
+        {
+            Id = newId,
+            ProductId = createWarehouseDto.ProductId,
+            Quantity = createWarehouseDto.Quantity
+        };
+
+        var createdWarehouse = await _warehouseRepository.CreateWarehouseAsync(warehouse);
+
+        return new WarehouseDto 
+        { 
+            Id = createdWarehouse.Id, 
+            ProductId = createdWarehouse.ProductId, 
+            Quantity = createdWarehouse.Quantity,
+            ProductName = null // Will be populated if needed
+        };
+    }
 }
