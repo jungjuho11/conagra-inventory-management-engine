@@ -112,30 +112,51 @@ public class WarehouseService : IWarehouseService
 
         // Check if warehouse inventory already exists for this product
         var existingWarehouse = await _warehouseRepository.GetWarehouseInventoryByProductIdAsync(createWarehouseDto.ProductId);
+        
+        WarehouseDto result;
+        
         if (existingWarehouse != null)
         {
-            throw new InvalidOperationException($"Warehouse inventory already exists for product ID {createWarehouseDto.ProductId}.");
+            // Update existing warehouse inventory (replace quantity)
+            var warehouseUpdated = await _warehouseRepository.UpdateWarehouseQuantityAsync(createWarehouseDto.ProductId, createWarehouseDto.Quantity);
+            
+            if (!warehouseUpdated)
+            {
+                throw new InvalidOperationException("Failed to update warehouse inventory.");
+            }
+            
+            result = new WarehouseDto 
+            { 
+                Id = existingWarehouse.Id, 
+                ProductId = existingWarehouse.ProductId, 
+                Quantity = createWarehouseDto.Quantity,
+                ProductName = null // Will be populated if needed
+            };
+        }
+        else
+        {
+            // Create new warehouse inventory record
+            var lastId = await _warehouseRepository.GetLastWarehouseIdAsync();
+            var newId = lastId + 1;
+
+            var warehouse = new Warehouse
+            {
+                Id = newId,
+                ProductId = createWarehouseDto.ProductId,
+                Quantity = createWarehouseDto.Quantity
+            };
+
+            var createdWarehouse = await _warehouseRepository.CreateWarehouseAsync(warehouse);
+            
+            result = new WarehouseDto 
+            { 
+                Id = createdWarehouse.Id, 
+                ProductId = createdWarehouse.ProductId, 
+                Quantity = createdWarehouse.Quantity,
+                ProductName = null // Will be populated if needed
+            };
         }
 
-        // Get the last warehouse ID and increment it
-        var lastId = await _warehouseRepository.GetLastWarehouseIdAsync();
-        var newId = lastId + 1;
-
-        var warehouse = new Warehouse
-        {
-            Id = newId,
-            ProductId = createWarehouseDto.ProductId,
-            Quantity = createWarehouseDto.Quantity
-        };
-
-        var createdWarehouse = await _warehouseRepository.CreateWarehouseAsync(warehouse);
-
-        return new WarehouseDto 
-        { 
-            Id = createdWarehouse.Id, 
-            ProductId = createdWarehouse.ProductId, 
-            Quantity = createdWarehouse.Quantity,
-            ProductName = null // Will be populated if needed
-        };
+        return result;
     }
 }
