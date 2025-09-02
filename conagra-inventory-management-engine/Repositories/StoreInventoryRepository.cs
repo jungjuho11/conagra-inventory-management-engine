@@ -253,7 +253,7 @@ public class StoreInventoryRepository : IStoreInventoryRepository
             .From<StoreInventory>()
             .Where(x => x.StoreId == storeId && x.ProductId == productId)
             .Set(x => x.Quantity, newQuantity)
-            .Get();
+            .Update();
     
         return response.Models.First();
     }

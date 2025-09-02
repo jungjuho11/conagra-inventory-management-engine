@@ -56,7 +56,7 @@ public class Program
         {
             options.AddPolicy("AllowAngularApp", policy =>
             {
-                policy.WithOrigins("http://localhost:4200", "https://your-app-name.netlify.app")
+                policy.WithOrigins("http://localhost:4200", "https://conagra-inventory-management-system.netlify.app/")
                       .AllowAnyHeader()
                       .AllowAnyMethod();
             });
