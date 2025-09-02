@@ -48,6 +48,17 @@ public class Program
         builder.Services.AddScoped<IStoreInventoryService, StoreInventoryService>();
         builder.Services.AddScoped<IInventoryThresholdsService, InventoryThresholdsService>();
 
+        // Add CORS configuration
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("AllowAngularApp", policy =>
+            {
+                policy.WithOrigins("http://localhost:4200", "https://your-app-name.netlify.app")
+                      .AllowAnyHeader()
+                      .AllowAnyMethod();
+            });
+        });
+
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
@@ -59,8 +70,9 @@ public class Program
 
         app.UseHttpsRedirection();
 
-        app.UseAuthorization();
+        app.UseCors("AllowAngularApp");
 
+        app.UseAuthorization();
 
         app.MapControllers();
 
