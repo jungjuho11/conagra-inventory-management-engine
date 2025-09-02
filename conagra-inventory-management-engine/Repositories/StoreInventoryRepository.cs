@@ -184,4 +184,77 @@ public class StoreInventoryRepository : IStoreInventoryRepository
 
         return storesBelowThreshold;
     }
+
+    public async Task<bool> StoreExistsAsync(int storeId)
+    {
+        var response = await _supabaseClient
+            .From<Store>()
+            .Where(x => x.Id == storeId)
+            .Get();
+        
+        return response.Models.Any();
+    }
+
+    public async Task<bool> ProductExistsAsync(int productId)
+    {
+        var response = await _supabaseClient
+            .From<Product>()
+            .Where(x => x.Id == productId)
+            .Get();
+        
+        return response.Models.Any();
+    }
+
+    public async Task<int> GetLastStoreInventoryIdAsync()
+    {
+        var response = await _supabaseClient
+            .From<StoreInventory>()
+            .Order(x => x.Id, Supabase.Postgrest.Constants.Ordering.Descending)
+            .Limit(1)
+            .Get();
+        
+        if (response.Models.Any())
+        {
+            return response.Models.First().Id;
+        }
+        
+        return 0; // If no store inventory records exist, start with ID 1
+    }
+
+    public async Task<StoreInventory> CreateStoreInventoryAsync(StoreInventory storeInventory)
+    {
+        // Use StoreInventoryInsert model to avoid navigation property issues
+        var storeInventoryToInsert = new StoreInventoryInsert
+        {
+            Id = storeInventory.Id,
+            StoreId = storeInventory.StoreId,
+            ProductId = storeInventory.ProductId,
+            Quantity = storeInventory.Quantity
+        };
+        
+        var response = await _supabaseClient
+            .From<StoreInventoryInsert>()
+            .Insert(storeInventoryToInsert);
+        
+        // Convert back to StoreInventory model for return
+        var insertedStoreInventory = response.Models.First();
+        return new StoreInventory
+        {
+            Id = insertedStoreInventory.Id,
+            StoreId = insertedStoreInventory.StoreId,
+            ProductId = insertedStoreInventory.ProductId,
+            Quantity = insertedStoreInventory.Quantity
+        };
+    }
+
+    public async Task<StoreInventory> UpdateStoreInventoryQuantityAsync(int storeId, int productId, int newQuantity)
+    {
+        var response = await _supabaseClient
+            .From<StoreInventory>()
+            .Where(x => x.StoreId == storeId && x.ProductId == productId)
+            .Set(x => x.Quantity, newQuantity)
+            .Get();
+    
+        return response.Models.First();
+    }
 }

@@ -10,6 +10,13 @@ public class StoreInventoryDto
     public string? ProductName { get; set; }
 }
 
+public class CreateStoreInventoryDto
+{
+    public int StoreId { get; set; }
+    public int ProductId { get; set; }
+    public int Quantity { get; set; }
+}
+
 public class StoreInventoryDetailDto : StoreInventoryDto
 {
     public int? ThresholdQuantity { get; set; }

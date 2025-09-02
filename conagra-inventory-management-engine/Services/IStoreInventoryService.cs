@@ -8,4 +8,5 @@ public interface IStoreInventoryService
 {
     Task<PagedResult<StoreInventoryDto>> GetStoreInventoryAsync(StoreInventoryQueryParameters queryParameters);
     Task<StoreInventoryDto?> GetStoreInventoryByStoreAndProductAsync(int storeId, int productId);
+    Task<StoreInventoryDto> CreateStoreInventoryAsync(CreateStoreInventoryDto createStoreInventoryDto);
 }

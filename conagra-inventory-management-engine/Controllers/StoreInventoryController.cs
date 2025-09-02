@@ -46,4 +46,37 @@ public class StoreInventoryController : ControllerBase
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
+
+    [HttpPost]
+    public async Task<ActionResult<StoreInventoryDto>> CreateStoreInventory([FromBody] CreateStoreInventoryDto createStoreInventoryDto)
+    {
+        try
+        {
+            if (createStoreInventoryDto.StoreId <= 0)
+            {
+                return BadRequest("Store ID must be greater than 0");
+            }
+
+            if (createStoreInventoryDto.ProductId <= 0)
+            {
+                return BadRequest("Product ID must be greater than 0");
+            }
+
+            if (createStoreInventoryDto.Quantity < 0)
+            {
+                return BadRequest("Quantity cannot be negative");
+            }
+
+            var createdStoreInventory = await _storeInventoryService.CreateStoreInventoryAsync(createStoreInventoryDto);
+            return CreatedAtAction(nameof(GetStoreInventoryByStoreAndProduct), new { storeId = createdStoreInventory.StoreId, productId = createdStoreInventory.ProductId }, createdStoreInventory);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
 }
