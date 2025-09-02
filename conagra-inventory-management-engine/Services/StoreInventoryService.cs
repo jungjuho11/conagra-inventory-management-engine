@@ -29,6 +29,20 @@ public class StoreInventoryService : IStoreInventoryService
             storeInventory = storeInventory.Where(si => si.ProductId == queryParameters.ProductId.Value);
         }
 
+        // Apply store name filter (partial match)
+        if (!string.IsNullOrEmpty(queryParameters.StoreName))
+        {
+            storeInventory = storeInventory.Where(si => 
+                si.Store?.Name.Contains(queryParameters.StoreName, StringComparison.OrdinalIgnoreCase) == true);
+        }
+
+        // Apply product name filter (partial match)
+        if (!string.IsNullOrEmpty(queryParameters.ProductName))
+        {
+            storeInventory = storeInventory.Where(si => 
+                si.Product?.Name.Contains(queryParameters.ProductName, StringComparison.OrdinalIgnoreCase) == true);
+        }
+
         if (queryParameters.BelowThreshold.HasValue && queryParameters.BelowThreshold.Value)
         {
             // This would need to be enhanced to actually check against thresholds
