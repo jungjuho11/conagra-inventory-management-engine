@@ -40,6 +40,7 @@ public class Program
         builder.Services.AddScoped<IStoreRepository, StoreRepository>();
         builder.Services.AddScoped<IWarehouseRepository, WarehouseRepository>();
         builder.Services.AddScoped<IStoreInventoryRepository, StoreInventoryRepository>();
+        builder.Services.AddScoped<IInventoryThresholdRepository, InventoryThresholdRepository>();
 
         // Register services
         builder.Services.AddScoped<IStoresService, StoresService>();

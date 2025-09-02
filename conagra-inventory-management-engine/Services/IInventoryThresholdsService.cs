@@ -8,4 +8,5 @@ public interface IInventoryThresholdsService
 {
     Task<PagedResult<InventoryThresholdDto>> GetInventoryThresholdsAsync(InventoryThresholdQueryParameters queryParameters);
     Task<InventoryThresholdDto?> GetInventoryThresholdByStoreAndProductAsync(int storeId, int productId);
+    Task<InventoryThresholdDto> CreateInventoryThresholdAsync(CreateInventoryThresholdDto createInventoryThresholdDto);
 }

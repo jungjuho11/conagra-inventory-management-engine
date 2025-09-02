@@ -46,4 +46,37 @@ public class InventoryThresholdsController : ControllerBase
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
+
+    [HttpPost]
+    public async Task<ActionResult<InventoryThresholdDto>> CreateInventoryThreshold([FromBody] CreateInventoryThresholdDto createInventoryThresholdDto)
+    {
+        try
+        {
+            if (createInventoryThresholdDto.StoreId <= 0)
+            {
+                return BadRequest("Store ID must be greater than 0");
+            }
+
+            if (createInventoryThresholdDto.ProductId <= 0)
+            {
+                return BadRequest("Product ID must be greater than 0");
+            }
+
+            if (createInventoryThresholdDto.ThresholdQuantity < 0)
+            {
+                return BadRequest("Threshold quantity cannot be negative");
+            }
+
+            var createdInventoryThreshold = await _inventoryThresholdsService.CreateInventoryThresholdAsync(createInventoryThresholdDto);
+            return CreatedAtAction(nameof(GetInventoryThresholdByStoreAndProduct), new { storeId = createdInventoryThreshold.StoreId, productId = createdInventoryThreshold.ProductId }, createdInventoryThreshold);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
 }

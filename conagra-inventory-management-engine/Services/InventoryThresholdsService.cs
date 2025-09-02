@@ -1,6 +1,7 @@
 using conagra_inventory_management_engine.Models;
 using conagra_inventory_management_engine.Common;
 using conagra_inventory_management_engine.DTOs;
+using conagra_inventory_management_engine.Repositories;
 using Supabase;
 
 namespace conagra_inventory_management_engine.Services;
@@ -8,10 +9,12 @@ namespace conagra_inventory_management_engine.Services;
 public class InventoryThresholdsService : IInventoryThresholdsService
 {
     private readonly Supabase.Client _supabaseClient;
+    private readonly IInventoryThresholdRepository _inventoryThresholdRepository;
 
-    public InventoryThresholdsService(Supabase.Client supabaseClient)
+    public InventoryThresholdsService(Supabase.Client supabaseClient, IInventoryThresholdRepository inventoryThresholdRepository)
     {
         _supabaseClient = supabaseClient;
+        _inventoryThresholdRepository = inventoryThresholdRepository;
     }
 
     public async Task<PagedResult<InventoryThresholdDto>> GetInventoryThresholdsAsync(InventoryThresholdQueryParameters queryParameters)
@@ -165,5 +168,71 @@ public class InventoryThresholdsService : IInventoryThresholdsService
             StoreName = threshold.Store?.Name,
             ProductName = threshold.Product?.Name
         };
+    }
+
+    public async Task<InventoryThresholdDto> CreateInventoryThresholdAsync(CreateInventoryThresholdDto createInventoryThresholdDto)
+    {
+        // Validate that the store exists
+        var storeExists = await _inventoryThresholdRepository.StoreExistsAsync(createInventoryThresholdDto.StoreId);
+        if (!storeExists)
+        {
+            throw new InvalidOperationException($"Store with ID {createInventoryThresholdDto.StoreId} does not exist.");
+        }
+
+        // Validate that the product exists
+        var productExists = await _inventoryThresholdRepository.ProductExistsAsync(createInventoryThresholdDto.ProductId);
+        if (!productExists)
+        {
+            throw new InvalidOperationException($"Product with ID {createInventoryThresholdDto.ProductId} does not exist.");
+        }
+
+        // Check if inventory threshold already exists for this store and product combination
+        var existingThreshold = await _inventoryThresholdRepository.GetInventoryThresholdByStoreAndProductAsync(createInventoryThresholdDto.StoreId, createInventoryThresholdDto.ProductId);
+        
+        InventoryThresholdDto result;
+        
+        if (existingThreshold != null)
+        {
+            // Update existing threshold
+            var updatedThreshold = await _inventoryThresholdRepository.UpdateInventoryThresholdQuantityAsync(createInventoryThresholdDto.StoreId, createInventoryThresholdDto.ProductId, createInventoryThresholdDto.ThresholdQuantity);
+            
+            result = new InventoryThresholdDto 
+            { 
+                Id = updatedThreshold.Id, 
+                StoreId = updatedThreshold.StoreId, 
+                ProductId = updatedThreshold.ProductId, 
+                ThresholdQuantity = updatedThreshold.ThresholdQuantity,
+                StoreName = null, // Will be populated if needed
+                ProductName = null // Will be populated if needed
+            };
+        }
+        else
+        {
+            // Create new inventory threshold record
+            var lastId = await _inventoryThresholdRepository.GetLastInventoryThresholdIdAsync();
+            var newId = lastId + 1;
+
+            var inventoryThreshold = new InventoryThreshold
+            {
+                Id = newId,
+                StoreId = createInventoryThresholdDto.StoreId,
+                ProductId = createInventoryThresholdDto.ProductId,
+                ThresholdQuantity = createInventoryThresholdDto.ThresholdQuantity
+            };
+
+            var createdInventoryThreshold = await _inventoryThresholdRepository.CreateInventoryThresholdAsync(inventoryThreshold);
+            
+            result = new InventoryThresholdDto 
+            { 
+                Id = createdInventoryThreshold.Id, 
+                StoreId = createdInventoryThreshold.StoreId, 
+                ProductId = createdInventoryThreshold.ProductId, 
+                ThresholdQuantity = createdInventoryThreshold.ThresholdQuantity,
+                StoreName = null, // Will be populated if needed
+                ProductName = null // Will be populated if needed
+            };
+        }
+
+        return result;
     }
 }
