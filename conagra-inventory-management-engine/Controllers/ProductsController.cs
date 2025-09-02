@@ -46,4 +46,27 @@ public class ProductsController : ControllerBase
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
+
+    [HttpPost]
+    public async Task<ActionResult<ProductDto>> CreateProduct([FromBody] CreateProductDto createProductDto)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(createProductDto.Name))
+            {
+                return BadRequest("Product name is required");
+            }
+
+            var createdProduct = await _productsService.CreateProductAsync(createProductDto);
+            return CreatedAtAction(nameof(GetProductById), new { productId = createdProduct.Id }, createdProduct);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
 }

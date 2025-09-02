@@ -72,4 +72,27 @@ public class ProductsService : IProductsService
         var product = await _productRepository.GetProductByIdAsync(productId);
         return product == null ? null : new ProductDto { Id = product.Id, Name = product.Name };
     }
+
+    public async Task<ProductDto> CreateProductAsync(CreateProductDto createProductDto)
+    {
+        // Check if product with the same name already exists (case-insensitive)
+        var existingProduct = await _productRepository.GetProductByNameAsync(createProductDto.Name);
+        if (existingProduct != null)
+        {
+            throw new InvalidOperationException($"A product with the name '{createProductDto.Name}' already exists.");
+        }
+
+        // Get the last product ID and increment it
+        var lastId = await _productRepository.GetLastProductIdAsync();
+        var newId = lastId + 1;
+
+        var product = new Product
+        {
+            Id = newId,
+            Name = createProductDto.Name
+        };
+
+        var createdProduct = await _productRepository.CreateProductAsync(product);
+        return new ProductDto { Id = createdProduct.Id, Name = createdProduct.Name };
+    }
 }

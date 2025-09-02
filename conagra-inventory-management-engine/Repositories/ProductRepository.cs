@@ -30,4 +30,40 @@ public class ProductRepository : IProductRepository
         
         return response.Models.FirstOrDefault();
     }
+
+    public async Task<Product?> GetProductByNameAsync(string name)
+    {
+        var response = await _supabaseClient
+            .From<Product>()
+            .Get();
+        
+        // Filter in memory for case-insensitive comparison
+        return response.Models
+            .FirstOrDefault(p => p.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+    }
+
+    public async Task<int> GetLastProductIdAsync()
+    {
+        var response = await _supabaseClient
+            .From<Product>()
+            .Order(x => x.Id, Supabase.Postgrest.Constants.Ordering.Descending)
+            .Limit(1)
+            .Get();
+        
+        if (response.Models.Any())
+        {
+            return response.Models.First().Id;
+        }
+        
+        return 0; // If no products exist, start with ID 1
+    }
+
+    public async Task<Product> CreateProductAsync(Product product)
+    {
+        var response = await _supabaseClient
+            .From<Product>()
+            .Insert(product);
+        
+        return response.Models.First();
+    }
 }

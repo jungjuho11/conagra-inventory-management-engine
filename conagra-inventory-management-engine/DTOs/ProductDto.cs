@@ -6,6 +6,11 @@ public class ProductDto
     public string Name { get; set; } = string.Empty;
 }
 
+public class CreateProductDto
+{
+    public string Name { get; set; } = string.Empty;
+}
+
 public class ProductDetailDto : ProductDto
 {
     // Add any additional fields for detailed product view if needed
