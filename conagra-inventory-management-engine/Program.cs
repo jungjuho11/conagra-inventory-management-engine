@@ -41,6 +41,7 @@ public class Program
         builder.Services.AddScoped<IWarehouseRepository, WarehouseRepository>();
         builder.Services.AddScoped<IStoreInventoryRepository, StoreInventoryRepository>();
         builder.Services.AddScoped<IInventoryThresholdRepository, InventoryThresholdRepository>();
+        builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 
         // Register services
         builder.Services.AddScoped<IStoresService, StoresService>();
@@ -48,6 +49,7 @@ public class Program
         builder.Services.AddScoped<IWarehouseService, WarehouseService>();
         builder.Services.AddScoped<IStoreInventoryService, StoreInventoryService>();
         builder.Services.AddScoped<IInventoryThresholdsService, InventoryThresholdsService>();
+        builder.Services.AddScoped<INotificationService, NotificationService>();
 
         // Add CORS configuration
         builder.Services.AddCors(options =>
