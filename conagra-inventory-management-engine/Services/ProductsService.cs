@@ -14,9 +14,21 @@ public class ProductsService : IProductsService
         _productRepository = productRepository;
     }
 
-    public async Task<PagedResult<ProductDto>> GetProductsAsync(QueryParameters queryParameters)
+    public async Task<PagedResult<ProductDto>> GetProductsAsync(ProductQueryParameters queryParameters)
     {
         var products = await _productRepository.GetAllProductsAsync();
+        
+        // Apply product ID filter
+        if (queryParameters.ProductId.HasValue)
+        {
+            products = products.Where(p => p.Id == queryParameters.ProductId.Value);
+        }
+        
+        // Apply product name filter (partial match)
+        if (!string.IsNullOrEmpty(queryParameters.ProductName))
+        {
+            products = products.Where(p => p.Name.Contains(queryParameters.ProductName, StringComparison.OrdinalIgnoreCase));
+        }
         
         // Apply search filter
         if (!string.IsNullOrEmpty(queryParameters.Search))

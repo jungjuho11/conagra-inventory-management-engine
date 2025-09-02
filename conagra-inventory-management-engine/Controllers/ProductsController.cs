@@ -17,7 +17,7 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<PagedResult<ProductDto>>> GetProducts([FromQuery] QueryParameters queryParameters)
+    public async Task<ActionResult<PagedResult<ProductDto>>> GetProducts([FromQuery] ProductQueryParameters queryParameters)
     {
         try
         {

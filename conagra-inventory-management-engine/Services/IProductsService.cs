@@ -6,6 +6,6 @@ namespace conagra_inventory_management_engine.Services;
 
 public interface IProductsService
 {
-    Task<PagedResult<ProductDto>> GetProductsAsync(QueryParameters queryParameters);
+    Task<PagedResult<ProductDto>> GetProductsAsync(ProductQueryParameters queryParameters);
     Task<ProductDto?> GetProductByIdAsync(int productId);
 }
