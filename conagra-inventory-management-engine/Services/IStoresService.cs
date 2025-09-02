@@ -6,6 +6,6 @@ namespace conagra_inventory_management_engine.Services;
 
 public interface IStoresService
 {
-    Task<PagedResult<StoreDto>> GetStoresAsync(QueryParameters queryParameters);
+    Task<PagedResult<StoreDto>> GetStoresAsync(StoreQueryParameters queryParameters);
     Task<StoreDto?> GetStoreByIdAsync(int storeId);
 }

@@ -35,6 +35,13 @@ public class ProductQueryParameters : QueryParameters
     public string? ProductName { get; set; }
 }
 
+public class StoreQueryParameters : QueryParameters
+{
+    public int? StoreId { get; set; }
+    public string? StoreName { get; set; }
+    public string? StoreAddress { get; set; }
+}
+
 public class WarehouseQueryParameters : QueryParameters
 {
     public int? ProductId { get; set; }

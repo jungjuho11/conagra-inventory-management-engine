@@ -17,7 +17,7 @@ public class StoresController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<PagedResult<StoreDto>>> GetStores([FromQuery] QueryParameters queryParameters)
+    public async Task<ActionResult<PagedResult<StoreDto>>> GetStores([FromQuery] StoreQueryParameters queryParameters)
     {
         try
         {

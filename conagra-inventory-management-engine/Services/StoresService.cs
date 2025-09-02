@@ -14,9 +14,27 @@ public class StoresService : IStoresService
         _storeRepository = storeRepository;
     }
 
-    public async Task<PagedResult<StoreDto>> GetStoresAsync(QueryParameters queryParameters)
+    public async Task<PagedResult<StoreDto>> GetStoresAsync(StoreQueryParameters queryParameters)
     {
         var stores = await _storeRepository.GetAllStoresAsync();
+        
+        // Apply store ID filter
+        if (queryParameters.StoreId.HasValue)
+        {
+            stores = stores.Where(s => s.Id == queryParameters.StoreId.Value);
+        }
+        
+        // Apply store name filter (partial match)
+        if (!string.IsNullOrEmpty(queryParameters.StoreName))
+        {
+            stores = stores.Where(s => s.Name.Contains(queryParameters.StoreName, StringComparison.OrdinalIgnoreCase));
+        }
+        
+        // Apply store address filter (partial match)
+        if (!string.IsNullOrEmpty(queryParameters.StoreAddress))
+        {
+            stores = stores.Where(s => s.Address != null && s.Address.Contains(queryParameters.StoreAddress, StringComparison.OrdinalIgnoreCase));
+        }
         
         // Apply search filter
         if (!string.IsNullOrEmpty(queryParameters.Search))
